@@ -1,0 +1,27 @@
+(ns issues-combined.handler
+  (:require [compojure.core :refer [routes wrap-routes]]
+            [issues-combined.layout :refer [error-page]]
+            [issues-combined.routes.home :refer [home-routes]]
+            [issues-combined.routes.services :refer [service-routes]]
+            [compojure.route :as route]
+            [issues-combined.env :refer [defaults]]
+            [mount.core :as mount]
+            [issues-combined.middleware :as middleware]))
+
+(mount/defstate init-app
+                :start ((or (:init defaults) identity))
+                :stop  ((or (:stop defaults) identity)))
+
+(def app-routes
+  (routes
+    (-> #'home-routes
+        (wrap-routes middleware/wrap-csrf)
+        (wrap-routes middleware/wrap-formats))
+    #'service-routes
+    (route/not-found
+      (:body
+        (error-page {:status 404
+                     :title "page not found"})))))
+
+
+(defn app [] (middleware/wrap-base #'app-routes))
