@@ -1,7 +1,10 @@
 (ns issues-combined.routes.services
   (:require [ring.util.http-response :refer :all]
             [compojure.api.sweet :refer :all]
-            [schema.core :as s]))
+            [schema.core :as s]
+            [clj-http.client :as client]))
+
+(def token "token")
 
 (defapi service-routes
   {:swagger {:ui "/swagger-ui"
@@ -41,4 +44,24 @@
       :return      Long
       :header-params [x :- Long, y :- Long]
       :summary     "x^y with header-parameters"
-      (ok (long (Math/pow x y))))))
+      (ok (long (Math/pow x y)))
+      )
+    (POST "/test" []
+      :summary     "x/y with form-parameters"
+      (let [result  (client/get "https://github.daumkakao.com/api/v3/repos/MailProject/groot-api/issues" 
+                      {:headers {"Authorization" token}
+                       :as :json})
+            body-firstpage (:body result)
+            titles (map :title body-firstpage)]
+          (ok titles)))))
+
+
+
+
+
+
+
+
+
+
+

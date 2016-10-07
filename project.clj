@@ -29,7 +29,9 @@
                  [cider/cider-nrepl "0.14.0-SNAPSHOT"]
                  [com.novemberain/monger "3.0.0-rc2"]
                  [org.webjars/webjars-locator-jboss-vfs "0.1.0"]
-                 [luminus-immutant "0.2.2"]]
+                 [luminus-immutant "0.2.2"]
+                 [clj-http "2.3.0"]
+                 ]
 
   :min-lein-version "2.0.0"
 
