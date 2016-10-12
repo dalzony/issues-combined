@@ -1,25 +1,39 @@
 (ns issues-combined.db.core
-    (:require [monger.core :as mg]
-              [monger.collection :as mc]
-              [monger.operators :refer :all]
-              [mount.core :refer [defstate]]
-              [issues-combined.config :refer [env]]))
+  (:require [issues-combined.config :refer [env]]
+            [monger.collection :as mc]
+            [monger.core :as mg]
+            [monger.operators :refer :all]
+            [mount.core :refer [defstate]])
+  (:import [com.mongodb MongoClientOptions ReadPreference ServerAddress WriteResult]))
 
 (defstate db*
-  :start (-> env :database-url mg/connect-via-uri)
+  :start (let [{:keys [host port user password]} (:db env)
+               ^MongoClientOptions opts (mg/mongo-options (assoc (:db env)
+                                                            :read-preference (ReadPreference/primaryPreferred)))
+               ^ServerAddress sa (mg/server-address host port)
+               conn (mg/connect sa opts)
+               db (mg/get-db conn (:name (:db env)))]
+           {:conn conn :db db})
+
   :stop (-> db* :conn mg/disconnect))
 
 (defstate db
   :start (:db db*))
 
+(defn create-token [token]
+  (let [^WriteResult result (mc/insert db "github" {:token token})]
+    {:count (.getN result)}))
+
 (defn create-user [user]
-  (mc/insert db "users" user))
+  (mc/insert db "issues" user))
 
 (defn update-user [id first-name last-name email]
-  (mc/update db "users" {:_id id}
+  (mc/update db "issues" {:_id id}
              {$set {:first_name first-name
                     :last_name last-name
                     :email email}}))
 
 (defn get-user [id]
-  (mc/find-one-as-map db "users" {:_id id}))
+  (mc/find-one-as-map db "issues" {:_id id}))
+
+

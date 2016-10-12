@@ -7,7 +7,7 @@
             [clojure.tools.cli :refer [parse-opts]]
             [clojure.tools.logging :as log]
             [mount.core :as mount])
-  (:gen-class))
+ (:gen-class))
 
 (def cli-options
   [["-p" "--port PORT" "Port number"
