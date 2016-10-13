@@ -7,8 +7,26 @@
 
 (s/defschema Project
   {:corp s/Str
-   :organiztion s/Str
+   :organization s/Str
    :repo-name s/Str})
+
+(defn make-url [{:keys [corp organization repo-name]}]
+  (format "https://github.%s.com/api/v3/repos/%s/%s/issues" corp organization repo-name))
+
+(defn get-issues [project]
+  (let [token (str "token " (db/get-token))
+        body-firstpage (:body (client/get (make-url project)
+                                {:headers {"Authorization" token}
+                                 :as :json}))
+        titles (map :title body-firstpage)]
+    titles
+))
+
+(defn project-with-issues [projects]
+  (map #(hash-map
+          :project-name (:repo-name %)
+          :issues (get-issues %))
+    projects))
 
 (defapi service-routes
   {:swagger {:ui "/swagger-ui"
@@ -36,12 +54,10 @@
       (let [result (db/create-projects! body)]
         result))
     (GET "/projects" []
-      :summary "프로젝트 보기"
+      :summary "프로젝트별 이슈 리스트 보기"
       (let [token (str "token " (db/get-token))
-            result (client/get "https://github.daumkakao.com/api/v3/repos/MailProject/groot-api/issues" 
-                     {:headers {"Authorization" token}
-                      :as :json})])
-      )
+            projects (db/get-all-projects)]
+        (ok (project-with-issues projects))))
     (POST "/test" []
       :summary "x/y with form-parameters"
       (let [token (str "token " (db/get-token))

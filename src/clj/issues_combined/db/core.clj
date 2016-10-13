@@ -40,13 +40,5 @@
   (let [^WriteResult result (mc/insert db "projects" project)]
     {:count (.getN result)}))
 
-
-
-
-
-
-
-
-
-
-
+(defn get-all-projects []
+  (mc/find-maps db "projects"))
