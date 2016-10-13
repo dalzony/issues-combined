@@ -20,19 +20,33 @@
 (defstate db
   :start (:db db*))
 
-(defn create-token [token]
+(defn create-token! [token]
   (let [^WriteResult result (mc/insert db "github" {:_id "token" :token token})]
     {:count (.getN result)}))
 
-(defn create-user [user]
+(defn create-user! [user]
   (mc/insert db "issues" user))
 
-(defn update-user [id first-name last-name email]
+(defn update-user! [id first-name last-name email]
   (mc/update db "issues" {:_id id}
              {$set {:first_name first-name
                     :last_name last-name
                     :email email}}))
 
 (defn get-token []
-  (:token (mc/find-one-as-map db "github" {:_id "token"})))
+  (:token (mc/find-one-as-map db "github" {:_id "token"}))) 
+
+(defn create-projects! [project]
+  (let [^WriteResult result (mc/insert db "projects" project)]
+    {:count (.getN result)}))
+
+
+
+
+
+
+
+
+
+
 

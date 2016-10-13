@@ -5,6 +5,11 @@
             [clj-http.client :as client]
             [issues-combined.db.core :as db]))
 
+(s/defschema Project
+  {:corp s/Str
+   :organiztion s/Str
+   :repo-name s/Str})
+
 (defapi service-routes
   {:swagger {:ui "/swagger-ui"
              :spec "/swagger.json"
@@ -23,8 +28,13 @@
     (POST "/register" []
       :summary "토큰 등록"
       :query-params [token :- String]
-      (let [result  (db/create-token token)]
+      (let [result (db/create-token! token)]
         (ok result)))
+    (POST "/projects" []
+      :summary "프로젝트 등록"
+      :body [body Project]
+      (let [result (db/create-projects! body)]
+        result))
     (POST "/test" []
       :summary "x/y with form-parameters"
       (let [token (str "token " (db/get-token))
