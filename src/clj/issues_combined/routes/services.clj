@@ -35,6 +35,13 @@
       :body [body Project]
       (let [result (db/create-projects! body)]
         result))
+    (GET "/projects" []
+      :summary "프로젝트 보기"
+      (let [token (str "token " (db/get-token))
+            result (client/get "https://github.daumkakao.com/api/v3/repos/MailProject/groot-api/issues" 
+                     {:headers {"Authorization" token}
+                      :as :json})])
+      )
     (POST "/test" []
       :summary "x/y with form-parameters"
       (let [token (str "token " (db/get-token))
@@ -43,6 +50,6 @@
                       :as :json})
             body-firstpage (:body result)
             titles (map :title body-firstpage)]
-        (db/create-user {:first_name "minsun" :last_name "Lee" :email "aaa"})
+        (db/create-user! {:first_name "minsun" :last_name "Lee" :email "aaa"})
         (ok titles)))))
 
