@@ -21,7 +21,7 @@
   :start (:db db*))
 
 (defn create-token [token]
-  (let [^WriteResult result (mc/insert db "github" {:token token})]
+  (let [^WriteResult result (mc/insert db "github" {:_id "token" :token token})]
     {:count (.getN result)}))
 
 (defn create-user [user]
@@ -33,7 +33,6 @@
                     :last_name last-name
                     :email email}}))
 
-(defn get-user [id]
-  (mc/find-one-as-map db "issues" {:_id id}))
-
+(defn get-token []
+  (:token (mc/find-one-as-map db "github" {:_id "token"})))
 

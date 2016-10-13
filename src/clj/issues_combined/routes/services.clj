@@ -24,14 +24,15 @@
       :summary "토큰 등록"
       :query-params [token :- String]
       (let [result  (db/create-token token)]
-        (println "<>>>>"  result)
         (ok result)))
     (POST "/test" []
       :summary "x/y with form-parameters"
-      (let [result  (client/get "https://github.daumkakao.com/api/v3/repos/MailProject/groot-api/issues" 
-                      {:headers {"Authorization" ""}
-                       :as :json})
+      (let [token (str "token " (db/get-token))
+            result (client/get "https://github.daumkakao.com/api/v3/repos/MailProject/groot-api/issues" 
+                     {:headers {"Authorization" token}
+                      :as :json})
             body-firstpage (:body result)
             titles (map :title body-firstpage)]
         (db/create-user {:first_name "minsun" :last_name "Lee" :email "aaa"})
         (ok titles)))))
+
