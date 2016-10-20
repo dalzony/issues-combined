@@ -9,6 +9,10 @@
             [ajax.core :refer [GET POST]])
   (:import goog.History))
 
+(defn lister [items]
+     (for [item items]
+       [:li "Item " (:project-name item)]))
+
 (defn nav-link [uri title page collapsed?]
   [:li.nav-item
    {:class (when (= page (session/get :page)) "active")}
@@ -30,10 +34,16 @@
          [nav-link "#/about" "About" :about collapsed?]]]])))
 
 (defn about-page []
-  [:div.container
-   [:div.row
-    [:div.col-md-12
-     "this is the story of issues-combined... work in progress"]]])
+
+  (let [projects (GET "/projects")]
+      [:div.container
+       [:div.row
+        [:div.col-md-12
+         [:ul
+          (lister [1 2 3])
+          [:li "a"]
+          [:li "b"]
+          ]]]]))
 
 (defn home-page []
   [:div.container

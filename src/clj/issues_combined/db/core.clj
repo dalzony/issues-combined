@@ -3,7 +3,8 @@
             [monger.collection :as mc]
             [monger.core :as mg]
             [monger.operators :refer :all]
-            [mount.core :refer [defstate]])
+            [mount.core :refer [defstate]]
+            [clj-http.client :as client])
   (:import [com.mongodb MongoClientOptions ReadPreference ServerAddress WriteResult]))
 
 (defstate db*
@@ -19,6 +20,10 @@
 
 (defstate db
   :start (:db db*))
+
+(defn- make-url [{:keys [corp organization repo-name]}]
+  (format "https://github.%s.com/api/v3/repos/%s/%s/issues" corp organization repo-name))
+
 
 (defn create-token! [token]
   (let [^WriteResult result (mc/insert db "github" {:_id "token" :token token})]
@@ -42,3 +47,18 @@
 
 (defn get-all-projects []
   (mc/find-maps db "projects"))
+
+(defn get-issues-titles [project]
+  (let [token (str "token " (get-token))
+        body-firstpage (:body (client/get (make-url project)
+                                {:headers {"Authorization" token}
+                                 :as :json}))
+        titles (map :title body-firstpage)]
+    titles))
+
+(defn get-project-with-issues []
+  (let [projects (get-all-projects)]
+    (map #(hash-map
+            :project-name (:repo-name %)
+            :issues (get-issues-titles %))
+      projects)))
