@@ -62,3 +62,10 @@
             :project-name (:repo-name %)
             :issues (get-issues-titles %))
       projects)))
+
+(defn create-iterations! [iteration]
+  (let [^WriteResult result (mc/insert db "iterations" iteration)]
+    {:count (.getN result)}))
+
+(defn get-all-iterations []
+  (map #(dissoc % :_id) (mc/find-maps db "iterations")))

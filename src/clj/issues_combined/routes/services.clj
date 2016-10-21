@@ -4,10 +4,18 @@
             [schema.core :as s]
             [issues-combined.db.core :as db]))
 
+(s/defschema milestone s/Int)
+
 (s/defschema Project
   {:corp s/Str
    :organization s/Str
    :repo-name s/Str})
+
+(s/defschema Iteration
+  {:date s/Int
+   :headman s/Str
+   :goal s/Str
+   :milestones [milestone]})
 
 (defapi service-routes
   {:swagger {:ui "/swagger-ui"
@@ -39,4 +47,24 @@
 
     (GET "/projects" []
       :summary "프로젝트별 이슈 리스트 보기"
-      (ok (db/get-project-with-issues)))))
+      (ok (db/get-project-with-issues))
+      )
+    
+    (POST "/iterations" []
+      :summary "새로운 이터레이션 등록"
+      :body [body Iteration]
+      (ok (db/create-iterations! body)))
+    
+    (GET "/iterations" []
+      :summary "모든 이터레이션 보기"
+      (ok (db/get-all-iterations)))
+
+    (PUT "/iterations/:id" []
+      :summary "iteration update"
+      (ok))
+    
+    ))
+
+
+
+
